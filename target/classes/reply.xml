@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="replyns">
+
+
+<!-- create sequence seq_reply start with 1 increment by 1; -->
+<select id="getSeq" resultType="integer">
+	select seq_reply.nextval;
+</select>
+
+<select id="selectLevel" parameterType="integer" resultType="integer">
+	select r_level from reply where r_num=#{r_ref}
+</select>
+
+<select id="selectStep" parameterType="integer" resultType="integer">
+	select r_step from reply where r_num=#{r_ref}
+</select>
+
+<update id="updateStep" parameterType="reply">
+	update reply set r_step+1
+	 where (r_ref=#{r_ref} and r_step>=#{r_step}) or
+	  (r_b_num=#{r_b_num} and r_ref>${r_ref})
+</update>
+
+<insert id="insert" parameterType="reply">
+	insert into reply values
+	 (#{r_num},#{r_b_num},#{r_ref},#{r_level},#{r_step},#{r_id},#{r_nick},#{r_content},sysdate, sysdate, #{r_ip},'n',)
+</insert>
+
+<update id="update" parameterType="reply">
+	update reply set r_content=#{r_content}, r_update=#{r_update} where r_num=#{r_num}
+</update>
+
+<update id="delete" parameterType="integer">
+	update reply set r_del='y' where r_num=#{r_num}
+</update>
+
+<select id="list" parameterType="integer" resultType="reply">
+	select * from reply where r_b_num=#{r_b_num} order by r_step
+</select>
+
+
+<!-- <select id="list" parameterType="map" resultType="board">
+	select * from
+    (select a.*, rownum rn from 
+    				// order by num desc
+    (select * from board order by ref desc,re_step)a )
+    where rn between #{startRow} and #{endRow}
+</select> -->
+
+<!-- <select id="list" parameterType="board" resultType="board">
+	select * from
+    (select a.*, rownum rn from 
+    				order by num desc
+    (select * from board 
+    where를 쓸수도 안쓸수도 있다.
+    <where>
+    	<if test="keyword!=null and keyword!=''">
+    		<if test="search=='subcon'">
+    			subject like '%'||#{keyword}||'%' or
+    			content like '%'||#{keyword}||'%'
+    		</if>
+    		<if test="search!='subcon'">
+    			${search} like '%'||#{keyword}||'%'
+    		</if>    	
+    	</if>
+    </where>
+    order by ref desc,re_step)a )
+   		where rn between #{startRow} and #{endRow}
+</select>
+<select id="maxNum" resultType="integer">
+	ref와 num이 같을 수도 있고 다를수도 있어서 별도 생성
+	select nvl(max(num),0) + 1 num from board
+</select>
+<insert id="insert" parameterType="board">
+	<selectKey keyProperty="num" order="BEFORE" resultType="integer">
+		select nvl(max(num),0) + 1 num from board
+	</selectKey>
+	답변글이 아니면 num과 ref는 같은 값
+	insert into board values(#{num},#{writer},#{subject},
+		#{content},#{email},0,#{password},#{ref},#{re_step},
+		#{re_level},#{ip},sysdate,'n')
+</insert>
+<update id="updateReadCount">
+	update board set readcount = readcount + 1 where num=#{num}
+</update>
+<select id="select"  resultType="board">
+	select * from board where num=#{num}
+</select>
+<select id="getTotal" parameterType="board" resultType="integer">
+	select count(*) from board
+    <where>
+    	<if test="keyword!=null and keyword!=''">
+    		<if test="search=='subcon'">
+    			subject like '%'||#{keyword}||'%' or
+    			content like '%'||#{keyword}||'%'
+    		</if>
+    		<if test="search!='subcon'">
+    			${search} like '%'||#{keyword}||'%'
+    		</if>    	
+    	</if>
+    </where>
+</select>
+<update id="update" parameterType="board">
+	update board set subject=#{subject},writer=#{writer},
+		email=#{email},content=#{content} where num=#{num}
+</update>
+<update id="delete" parameterType="integer">
+	update board set del='y' where num=#{num}
+</update>
+<update id="updateRe_step" parameterType="board">
+	update board set re_step = re_step+1 
+		where ref=#{ref} and re_step > #{re_step}
+</update> -->
+
+
+</mapper>
+
+
+
+
+
+
